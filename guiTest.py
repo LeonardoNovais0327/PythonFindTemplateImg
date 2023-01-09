@@ -88,8 +88,8 @@ opts.add_argument("--window-size=1920,1080")
 # opts.add_argument("--window-size=640,1136")
 
 driver = webdriver.Chrome(options=opts)
-# driver.get("https://metrobi.com/")
-driver.get("https://deliver.metrobi.com/signin")
+driver.get("https://metrobi.com/")
+# driver.get("https://deliver.metrobi.com/signin")
 
 assert "Metrobi" in driver.title
 
@@ -98,7 +98,7 @@ path = os.getcwd() + '\Screenshots\Screenshot.png'
 save_screenshot(driver, path)
 
 #find the coordinates of the image 
-findSubImg(path, (os.getcwd() + '\Logo\logo.webp'))
+findSubImg(path, (os.getcwd() + '\Logo\logo.png'))
 
 
 assert "No results found." not in driver.page_source
