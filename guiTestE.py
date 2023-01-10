@@ -19,31 +19,32 @@ def save_screenshot(driver: webdriver.Chrome, path) -> None:
 def findSubImg(img, subImg):    
     img = cv.imread(img)
     if img is not None:
-        imgGray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-        imgEdged = cv.Canny(imgGray, 50, 200)
+        imgGray = cv.cvtColor(img, cv.COLOR_RGB2GRAY)
+        imgEdged = cv.Canny(imgGray, 400, 500)
         template = treatTemplate(subImg)
         found = None
         
         try:
-            for scale in np.linspace(0.2, 1.0, 20)[::-1]:
+            for scale in np.linspace(0.2, 0.5, 20)[::-1]:
                 resized = imutils.resize(template, width = int((template.shape[1]) * scale))
                 (tH, tW) = resized.shape[:2]
-                cv.imshow("Resized", resized)
-                cv.waitKey(300)
-                result = cv.matchTemplate(imgEdged, resized, cv.TM_CCOEFF_NORMED)
-                (_, maxVal, _, maxLoc) = cv.minMaxLoc(result)
-                print(maxLoc)
+                result = cv.matchTemplate(imgEdged, resized, cv.TM_CCOEFF)
+                (minVal , maxVal, minLoc, maxLoc) = cv.minMaxLoc(result)
+                print("Val = ", maxVal, " - ", maxLoc)
+            
                 clone = np.dstack([imgEdged, imgEdged, imgEdged])
                 cv.rectangle(clone, (maxLoc[0], maxLoc[1]),
                     (maxLoc[0] + tW, maxLoc[1] + tH), (0, 0, 255), 2)
                 
                 cv.imshow("Visualize", clone)
-                cv.waitKey(300)
+                cv.waitKey(100)
                 if found is None or maxVal > found[0]:
                     found = (maxVal, maxLoc)
+                    
             (_, maxLoc) = found
             (startX, startY) = (int(maxLoc[0]), int(maxLoc[1]))
             (endX, endY) = (int((maxLoc[0] + tW)), int((maxLoc[1] + tH)))
+            
             cv.rectangle(img, (startX, startY), (endX, endY), (0, 0, 255), 2)   
             print(startX, ", ", startY)
             cv.imshow("Image", img)
@@ -69,13 +70,8 @@ def treatTemplate(img):
 opts = ChromeOptions()
 opts.add_argument("--window-size=1920,1080")
 
-# # iPhone 5
-# opts = ChromeOptions()
-# opts.add_argument("--window-size=640,1136")
-
 driver = webdriver.Chrome(options=opts)
-driver.get("https://metrobi.com/")
-# driver.get("https://deliver.metrobi.com/signin")
+driver.get("https://deliver.metrobi.com/signin")
 
 assert "Metrobi" in driver.title
 
